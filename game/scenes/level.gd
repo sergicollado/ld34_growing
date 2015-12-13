@@ -1,38 +1,110 @@
 
 extends Node2D
 
+export var INITIAL_HANGRY_TIME=10
+export var growing_meta = 100
+export var next_level = "level_01"
 
-var points = []
-var navigation
+const STATUS_PLAYING = 0
+const STATUS_GAMEOVER = 1
+const STATUS_SUCCESS = 2
+var status 
+
+var burrow
 var player
-var motion
-var begin = Vector2()
-var end = Vector2()
+var inventory
+var cam 
+var hangry_timer
+var ui_timer
+var ui_growing
+var ui_success
+var hangry_alert
+var growing_amount=0
+var food = []
 
 func _ready():
-	navigation = get_node("Navigation2D")
-	player = get_node("Navigation2D/props/Fox")
+	status = STATUS_PLAYING
+	cam = get_node("Camera2D")
+	player = get_node("Props/Fox")
+	burrow = get_node("Props/Burrow")
+	burrow.get_node("Area2D").connect("body_enter", self, "_burrow_enter")
+	burrow.get_node("Area2D").connect("body_exit", self, "_burrow_exit")
+	inventory = get_node("Control/UI/Inventory")
+	ui_timer = get_node("Control/UI/Hangry")
+	ui_growing = get_node("Control/UI/Growing")
+	hangry_timer = get_node("HangryTimer")
+	hangry_alert = get_node("Control/UI/HangryAlert")
+	ui_success = get_node("Control/UI/Success")
+	
+	hangry_timer.set_wait_time(INITIAL_HANGRY_TIME)
+	hangry_timer.start()
+	
+	hangry_timer.connect("timeout", self, "gameover")
+	
+	for food in get_tree().get_nodes_in_group("Food"):
+		food.connect("has_got_it", self, "food_has_got_it")
+	
 	set_fixed_process(true)
 
-func _fixed_process(delta):
-	# refresh the points in the path
-	if(Input.is_mouse_button_pressed(1)):
-		print("click")
-		begin = player.get_global_pos()
-		end = get_global_mouse_pos()
-		var p = get_node("Navigation2D").get_simple_path(begin, end)
-		points = Array(p) # Vector2array too complex to use, convert to regular array
-		points.invert()
-		print('POINTS:',points)
-#		print(points[0])
-		if points.size() > 1:
-			print('points')
-			player.move_to(points[1])
-			
-	update() # we update the node so it has to draw it self again
+func gameover():
+	print("gameover")
+	status= STATUS_GAMEOVER
+	set_fixed_process(false)
 
+func food_has_got_it(food):
+	player.set_food()
+	self.food.append(food.food_amount)
+	
+	var panel = TextureFrame.new()
+	panel.set_texture(food.icon)
+	inventory.add_child(panel)
+	
+func _burrow_enter(body):
+	if(body.get_name() != 'Fox'):
+		return
+		
+	for food_amount in food:
+		hangry_timer.set_wait_time(hangry_timer.get_time_left()+ food_amount)
+		growing_amount += food_amount
+	for child in inventory.get_children():
+		child.queue_free()
+		
+	
+	food.clear()
+	
+	player.let_food()
+	hangry_timer.start()	
+	burrow.fox_enter()
+	
+func _burrow_exit(body):
+	burrow.fox_exit()
+	
+func _fixed_process(delta):
+	if(status != STATUS_PLAYING):
+		set_fixed_process(false)
+		return
+	print(status)
+	
+	cam.set_pos(player.get_pos())
+	if(hangry_timer.get_time_left() < 10 ):
+		hangry_alert.show()
+	else:
+		hangry_alert.hide()
+	
+	ui_timer.set_text("hangry: "+str( round(hangry_timer.get_time_left())))
+	ui_growing.set_text("growing: "+str(growing_amount ))
+	hangry_alert.set_text(str( round(hangry_timer.get_time_left())))
+	
+	if(growing_amount >= growing_meta):
+		status = STATUS_SUCCESS
+		ui_success.show_message()
+		get_node("AnimationPlayer").play("zoom_out")
+	
+	update() # we update the node so it has to draw it self again
+	
+func next_level():
+	print("next level")
+	get_tree().change_scene("res://scenes/previous/"+next_level+".scn")
+	
 func _draw():
-	# if there are points to draw
-	if points.size() > 1:
-		for p in points:
-			draw_circle(p - get_global_pos(), 8, Color(1, 0, 0)) # we draw a circle (convert to global position first)
+	pass
