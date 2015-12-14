@@ -19,6 +19,8 @@ func _ready():
 
 func _on_enter(body):
 	if(not  body.can_carry() or status == STATUS_ENTER):
+		if(not body.can_carry()):
+			player.play("show_no_more")
 		return
 	status=STATUS_ENTER
 	emit_signal("has_got_it", self)

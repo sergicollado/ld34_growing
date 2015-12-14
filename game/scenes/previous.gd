@@ -5,10 +5,12 @@ export var month_number=1
 var sec = 0.3
 var amount = 0
 var map
+var current_level
 
 func _ready():
+	current_level = get_node("/root/global").get_current_level()
 	map = get_node("TileMap")
-	get_node("bigLabel").set_text("MONTH "+str(month_number))
+	get_node("CanvasLayer/bigLabel").set_text("MONTH "+current_level)
 	set_process(true)
 
 func _process(delta):
@@ -26,5 +28,5 @@ func show_message():
 	
 	
 func next_scene():
-	get_tree().change_scene("res://scenes/level_0"+str(month_number)+".scn")
+	get_tree().change_scene("res://scenes/level_0"+current_level+".scn")
 	

@@ -8,9 +8,14 @@ var friction = 0.85
 var player
 var current_scale
 var food_amount = 0
-const MAX_FOOD=2
+const MAX_FOOD=3
+
+const STATUS_LIFE =0
+const STATUS_DIED =1
+var status
 
 func _ready():
+	status = STATUS_LIFE
 	velocity = Vector2(0,0)
 	player = get_node("AnimationPlayer")
 	current_scale = get_scale()
@@ -25,7 +30,12 @@ func set_food():
 
 func let_food():
 	food_amount = 0
-
+	
+func get_shot():
+	set_fixed_process(false)
+	player.play("get_shot")
+	
+	
 func _fixed_process(delta):
 	var move_left = Input.is_action_pressed("ui_left")
 	var move_right = Input.is_action_pressed("ui_right")
@@ -35,6 +45,8 @@ func _fixed_process(delta):
 
 	if(cancel):
 		get_tree().quit()
+	if(status == STATUS_DIED):
+		return
 	
 	if(move_right):
 		velocity.x += speed*delta
