@@ -75,7 +75,7 @@ func _burrow_enter(body):
 		return
 	
 	if(food.size() >0):
-		fx.play("let_food")
+		fx.play("left_food")
 		
 	for food_amount in food:
 		hangry_timer.set_wait_time(hangry_timer.get_time_left()+ (food_amount/2))
@@ -98,7 +98,7 @@ func check_danger_tiles():
 	var cell = floor_map.get_cell(player_map_pos.x, player_map_pos.y)
 	if(cell == 3):
 		fx.play("shot")
-		fx.play("bad_decisions")
+		fx.play("bad_decision")
 		gameover()
 		player.status = player.STATUS_DIED
 		player.get_shot()
