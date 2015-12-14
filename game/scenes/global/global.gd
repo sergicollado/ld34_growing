@@ -16,7 +16,6 @@ func _input(event):
 		get_tree().quit()
 
 	
-
    #On load set the current scene to the last scene available
    
 #

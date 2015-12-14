@@ -22,3 +22,6 @@ func fox_enter():
 func fox_exit():
 	shader.set_shader_param("aura_width",0)
 	shader_cubs.set_shader_param("aura_width",0)
+	
+func fadeout():
+	get_node("AnimationPlayer").play("fadeout")

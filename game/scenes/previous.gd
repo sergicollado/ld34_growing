@@ -6,12 +6,27 @@ var sec = 0.3
 var amount = 0
 var map
 var current_level
+var timer
+var voice
 
 func _ready():
 	current_level = get_node("/root/global").get_current_level()
 	map = get_node("TileMap")
 	get_node("CanvasLayer/bigLabel").set_text("MONTH "+current_level)
 	set_process(true)
+	
+	timer = get_node("Timer")	
+	timer.start()
+	yield(timer, "timeout")
+	if(current_level == str(1)):
+		voice = get_node("voice_month_1")
+		voice.play()
+	if(current_level == str(3)):
+		voice = get_node("voice_month_3")
+		voice.play()
+	if(current_level == str(5)):
+		voice = get_node("voice_month_5").is
+		voice.play()
 
 func _process(delta):
 	amount += delta
@@ -28,5 +43,9 @@ func show_message():
 	
 	
 func next_scene():
+	if(voice):
+		if(voice.is_playing()):
+			timer.start()
+			yield(timer, "timeout")
 	get_tree().change_scene("res://scenes/level_0"+current_level+".scn")
 	

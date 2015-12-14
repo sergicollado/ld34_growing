@@ -62,6 +62,7 @@ func gameover():
 	set_fixed_process(false)
 
 func food_has_got_it(food):
+	fx.play("get_food")
 	player.set_food()
 	self.food.append(food.food_amount)
 	
@@ -72,6 +73,9 @@ func food_has_got_it(food):
 func _burrow_enter(body):
 	if(body.get_name() != 'Fox'):
 		return
+	
+	if(food.size() >0):
+		fx.play("let_food")
 		
 	for food_amount in food:
 		hangry_timer.set_wait_time(hangry_timer.get_time_left()+ (food_amount/2))
@@ -94,6 +98,7 @@ func check_danger_tiles():
 	var cell = floor_map.get_cell(player_map_pos.x, player_map_pos.y)
 	if(cell == 3):
 		fx.play("shot")
+		fx.play("bad_decisions")
 		gameover()
 		player.status = player.STATUS_DIED
 		player.get_shot()
@@ -118,6 +123,7 @@ func _fixed_process(delta):
 	
 	if(growing_amount >= growing_meta):
 		status = STATUS_SUCCESS
+		burrow.fadeout()
 		ui_success.show_message()
 		get_node("AnimationPlayer").play("zoom_out")
 	
