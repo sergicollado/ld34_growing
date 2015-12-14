@@ -25,7 +25,7 @@ func _ready():
 		voice = get_node("voice_month_3")
 		voice.play()
 	if(current_level == str(5)):
-		voice = get_node("voice_month_5").is
+		voice = get_node("voice_month_5")
 		voice.play()
 
 func _process(delta):
