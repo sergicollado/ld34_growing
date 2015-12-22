@@ -1,7 +1,7 @@
 
 extends Node2D
 
-export var INITIAL_HANGRY_TIME=10
+export var INITIAL_HUNGRY_TIME=30
 export var growing_meta = 100
 
 const STATUS_PLAYING = 0
@@ -15,34 +15,36 @@ var inventory
 var cam
 var fx
 var floor_map
-var hangry_timer
+var hungry_timer
 var ui_timer
 var ui_growing
 var ui_success
-var hangry_alert
+var hungry_alert
 var growing_amount=0
 var food = []
+var nav
 
 func _ready():
 	status = STATUS_PLAYING
 	cam = get_node("Camera2D")
-	player = get_node("Props/Fox")
-	burrow = get_node("Props/Burrow")
+	nav = get_node("Navigation2D")
+	player = get_node("Navigation2D/Props/Fox")
+	burrow = get_node("Navigation2D/Props/Burrow")
 	burrow.get_node("Area2D").connect("body_enter", self, "_burrow_enter")
 	burrow.get_node("Area2D").connect("body_exit", self, "_burrow_exit")
 	inventory = get_node("Control/UI/Inventory")
-	ui_timer = get_node("Control/UI/Hangry")
+	ui_timer = get_node("Control/UI/Hungry")
 	ui_growing = get_node("Control/UI/Growing")
-	floor_map = get_node("Floor")
-	hangry_timer = get_node("HangryTimer")
-	hangry_alert = get_node("Control/UI/HangryAlert")
+	floor_map = get_node("Navigation2D/Floor")
+	hungry_timer = get_node("HungryTimer")
+	hungry_alert = get_node("Control/UI/HungryAlert")
 	ui_success = get_node("Control/UI/Success")
 	fx = get_node("SamplePlayer")
 	
-	hangry_timer.set_wait_time(INITIAL_HANGRY_TIME)
-	hangry_timer.start()
+	hungry_timer.set_wait_time(INITIAL_HUNGRY_TIME)
+	hungry_timer.start()
 	
-	hangry_timer.connect("timeout", self, "gameover")
+	hungry_timer.connect("timeout", self, "gameover")
 	
 	for food in get_tree().get_nodes_in_group("Food"):
 		food.connect("has_got_it", self, "food_has_got_it")
@@ -53,6 +55,7 @@ func _ready():
 	set_fixed_process(true)
 
 func comeback(body):
+	nav.clean_path()
 	player.set_pos(Vector2(burrow.get_pos().x, burrow.get_pos().y+130))
 	
 func gameover():
@@ -78,7 +81,7 @@ func _burrow_enter(body):
 		fx.play("left_food")
 		
 	for food_amount in food:
-		hangry_timer.set_wait_time(hangry_timer.get_time_left()+ (food_amount/2))
+		hungry_timer.set_wait_time(hungry_timer.get_time_left()+ (food_amount/2))
 		growing_amount += food_amount
 	for child in inventory.get_children():
 		child.queue_free()
@@ -87,7 +90,7 @@ func _burrow_enter(body):
 	food.clear()
 	
 	player.let_food()
-	hangry_timer.start()	
+	hungry_timer.start()	
 	burrow.fox_enter()
 	
 func _burrow_exit(body):
@@ -112,14 +115,14 @@ func _fixed_process(delta):
 	check_danger_tiles()
 
 	cam.set_pos(player.get_pos())
-	if(hangry_timer.get_time_left() < 10 ):
-		hangry_alert.show()
+	if(hungry_timer.get_time_left() < 10 ):
+		hungry_alert.show()
 	else:
-		hangry_alert.hide()
+		hungry_alert.hide()
 	
-	ui_timer.set_text("hangry: "+str( round(hangry_timer.get_time_left())))
+	ui_timer.set_text("hungry: "+str( round(hungry_timer.get_time_left())))
 	ui_growing.set_text("growing: "+ str(growing_meta) +" / "+str(growing_amount ))
-	hangry_alert.set_text(str( round(hangry_timer.get_time_left())))
+	hungry_alert.set_text(str( round(hungry_timer.get_time_left())))
 	
 	if(growing_amount >= growing_meta):
 		status = STATUS_SUCCESS
