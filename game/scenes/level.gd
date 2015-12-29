@@ -59,9 +59,10 @@ func comeback(body):
 	player.set_pos(Vector2(burrow.get_pos().x, burrow.get_pos().y+130))
 	
 func gameover():
-	print("gameover")
 	status= STATUS_GAMEOVER
 	get_node("GameOver").show_messages()
+	get_node("GameOver").could_restart = true
+	nav.set_fixed_process(false)
 	set_fixed_process(false)
 
 func food_has_got_it(food):

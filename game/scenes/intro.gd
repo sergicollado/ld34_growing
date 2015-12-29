@@ -11,7 +11,7 @@ func _ready():
 	set_process(true)
 	
 func _process(delta):
-	var start = Input.is_action_pressed("ui_accept")
+	var start = Input.is_action_pressed("ui_accept") or Input.is_mouse_button_pressed(1)
 
 	if(start and ready):
 		get_tree().change_scene("res://scenes/previous.scn")

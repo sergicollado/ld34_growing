@@ -12,7 +12,6 @@ func _ready():
 	shader = get_node("burrow_sprite").get_material()
 	shader_cubs = get_node("cubs").get_material()
 	set_contact_monitor(true)
-	pass
 	
 func fox_enter():
 	shader.set_shader_param("aura_width",AURA_WIDTH)
